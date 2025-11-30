@@ -89,164 +89,133 @@ class Move:
 
 
 def create_move_tables():
-    """
-    Create move tables for all 18 moves.
-    
-    Corner positions (0-7):
-    0: URF, 1: UFL, 2: ULB, 3: UBR, 4: DFR, 5: DLF, 6: DBL, 7: DRB
-    
-    Edge positions (0-11) - Paper order: uf, ur, ub, ul, lf, fr, rb, bl, df, dr, db, dl
-    0: UF, 1: UR, 2: UB, 3: UL, 4: FL, 5: FR, 6: BR, 7: BL, 8: DF, 9: DR, 10: DB, 11: DL
-    """
+    """Create move tables for all 18 moves."""
     moves = {}
     
-    # U move (clockwise)
-    # Corners: 0->1->2->3->0, orientations unchanged (stay on U face)
-    # Edges: UF->UR->UB->UL->UF (paper order: 0->1->2->3->0)
-    # All top edges stay on U face, so reference stays on U - orientations unchanged
     moves['U'] = Move('U',
-        corner_perm=[1, 2, 3, 0, 4, 5, 6, 7],
+        corner_perm=[0, 1, 4, 2, 5, 3, 6, 7],  # 2->4, 4->5, 5->3, 3->2
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11],
+        edge_perm=[3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11],  # 0->1, 1->2, 2->3, 3->0
         edge_orient_delta=[0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
     )
     
-    # U2 move
     moves['U2'] = Move('U2',
-        corner_perm=[2, 3, 0, 1, 4, 5, 6, 7],
+        corner_perm=[0, 1, 5, 4, 3, 2, 6, 7],  # 2->5, 5->2, 4->3, 3->4
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edge_perm=[2, 3, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11],  # 0->2, 1->3, 2->0, 3->1
+        edge_orient_delta=[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
     )
     
-    # U' move (counterclockwise)
     moves["U'"] = Move("U'",
-        corner_perm=[3, 0, 1, 2, 4, 5, 6, 7],
+        corner_perm=[0, 1, 3, 5, 2, 4, 6, 7],  # 2->3, 3->5, 5->4, 4->2
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edge_perm=[1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11],  # 0->3, 1->0, 2->1, 3->2
+        edge_orient_delta=[1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     )
     
-    # D move (clockwise, viewed from top)
-    # Corners: 4->5->6->7->4
-    # Edges: DF->DR->DB->DL->DF (paper order: 8->9->10->11->8)
     moves['D'] = Move('D',
-        corner_perm=[0, 1, 2, 3, 7, 4, 5, 6],
+        corner_perm=[1, 7, 2, 3, 4, 5, 0, 6],  # 0->1, 1->7, 7->6, 6->0
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
         edge_perm=[0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 8],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0]
     )
     
     moves['D2'] = Move('D2',
-        corner_perm=[0, 1, 2, 3, 6, 7, 4, 5],
+        corner_perm=[7, 6, 2, 3, 4, 5, 1, 0],
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 8, 9],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edge_perm=[0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 8, 9],  # 8->10, 9->11, 10->8, 11->9
+        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
     )
     
     moves["D'"] = Move("D'",
-        corner_perm=[0, 1, 2, 3, 5, 6, 7, 4],
+        corner_perm=[6, 0, 2, 3, 4, 5, 7, 1],
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[0, 1, 2, 3, 4, 5, 6, 7, 11, 8, 9, 10],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edge_perm=[0, 1, 2, 3, 4, 5, 6, 7, 11, 8, 9, 10],  # 8->11, 9->8, 10->9, 11->10
+        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1]
     )
     
-    # L move (clockwise, viewed from left)
-    # Corners: 1->5->6->2->1, with orientation changes
-    # Edges: UL->FL->DL->BL->UL (paper order: 3->4->11->7->3)
-    # L moves don't flip edges (edges stay on same face orientation relative to L)
     moves['L'] = Move('L',
-        corner_perm=[0, 2, 6, 3, 4, 1, 5, 7],
-        corner_orient_delta=[0, 2, 1, 0, 0, 1, 2, 0],  # L moves twist corners
-        edge_perm=[0, 1, 2, 4, 11, 5, 6, 3, 8, 9, 10, 7],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        corner_perm=[0, 1, 2, 3, 6, 4, 7, 5],  # 4->6, 6->7, 7->5, 5->4
+        corner_orient_delta=[0, 0, 0, 0, 2, 1, 1, 2],  # 4: U->D +2, 5: U->U +1, 6: D->D +2, 7: D->U +1
+        edge_perm=[0, 1, 2, 4, 11, 5, 6, 3, 8, 9, 10, 7],  # 3->4, 4->11, 11->7, 7->3
+        edge_orient_delta=[0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]
     )
     
     moves['L2'] = Move('L2',
-        corner_perm=[0, 6, 5, 3, 4, 2, 1, 7],
+        corner_perm=[0, 1, 2, 3, 7, 6, 5, 4],
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[0, 1, 2, 11, 7, 5, 6, 4, 8, 9, 10, 3],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        edge_perm=[0, 1, 2, 11, 7, 5, 6, 4, 8, 9, 10, 3],  # 3->11, 4->7, 11->4, 7->3
+        edge_orient_delta=[0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1]
     )
     
     moves["L'"] = Move("L'",
-        corner_perm=[0, 2, 6, 3, 4, 1, 5, 7],
-        corner_orient_delta=[0, 2, 1, 0, 0, 2, 1, 0],
-        edge_perm=[0, 1, 2, 7, 3, 5, 6, 11, 8, 9, 10, 4],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    )
-    
-    # R move (clockwise, viewed from right)
-    # Corners: 0->4->7->3->0, with orientation changes
-    # Edges: UR->FR->DR->BR->UR (paper order: 1->5->9->6->1)
-    # R moves don't flip edges (edges stay on same face orientation relative to R)
-    moves['R'] = Move('R',
-        corner_perm=[4, 1, 2, 0, 7, 5, 6, 3],
-        corner_orient_delta=[1, 0, 0, 2, 2, 0, 0, 1],
-        edge_perm=[0, 5, 2, 3, 4, 9, 1, 7, 8, 6, 10, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    )
-    
-    moves['R2'] = Move('R2',
-        corner_perm=[7, 1, 2, 4, 3, 5, 6, 0],
-        corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[0, 9, 2, 3, 4, 6, 5, 7, 8, 1, 10, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        corner_perm=[0, 1, 2, 3, 5, 7, 4, 6],
+        corner_orient_delta=[0, 0, 0, 0, 2, 1, 1, 2],
+        edge_perm=[0, 1, 2, 7, 3, 5, 6, 11, 8, 9, 10, 4],  # 3->7, 4->3, 11->11, 7->4
+        edge_orient_delta=[0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0]
     )
     
     moves["R'"] = Move("R'",
-        corner_perm=[3, 1, 2, 7, 0, 5, 6, 4],
-        corner_orient_delta=[2, 0, 0, 1, 1, 0, 0, 2],
-        edge_perm=[0, 6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        corner_perm=[1, 3, 0, 2, 4, 5, 6, 7],
+        corner_orient_delta=[2, 1, 1, 2, 0, 0, 0, 0],
+        edge_perm=[0, 5, 2, 3, 4, 9, 1, 7, 8, 6, 10, 11],  # 1->6, 5->1, 9->5, 6->9
+        edge_orient_delta=[0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
     )
     
-    # F move (clockwise, viewed from front)
-    # Corners: 0->1->5->4->0, with orientation changes
-    # Edges: UF->FL->DF->FR->UF (paper order: 0->4->8->5->0), with orientation changes
+    moves['R2'] = Move('R2',
+        corner_perm=[3, 2, 1, 0, 4, 5, 6, 7],
+        corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
+        edge_perm=[0, 9, 2, 3, 4, 6, 5, 7, 8, 1, 10, 11],  # 1->9, 5->6, 9->1, 6->5
+        edge_orient_delta=[0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0]
+    )
+
+    moves['R'] = Move('R',
+        corner_perm=[2, 0, 3, 1, 4, 5, 6, 7],
+        corner_orient_delta=[2, 1, 1, 2, 0, 0, 0, 0],
+        edge_perm=[0, 6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11],  # 1->5, 5->9, 9->6, 6->1
+        edge_orient_delta=[0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]
+    )
+    
     moves['F'] = Move('F',
-        corner_perm=[1, 5, 2, 3, 0, 4, 6, 7],
-        corner_orient_delta=[1, 2, 0, 0, 2, 1, 0, 0],
-        edge_perm=[4, 1, 2, 3, 0, 8, 6, 7, 5, 9, 10, 11],
-        edge_orient_delta=[1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0]
+        corner_perm=[6, 1, 0, 3, 2, 5, 4, 7],  # 2->0, 0->6, 6->4, 4->2
+        corner_orient_delta=[1, 0, 2, 0, 1, 0, 2, 0],
+        edge_perm=[5, 1, 2, 3, 0, 8, 6, 7, 4, 9, 10, 11],
+        edge_orient_delta=[0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0]
     )
     
     moves['F2'] = Move('F2',
-        corner_perm=[5, 4, 2, 3, 1, 0, 6, 7],
+        corner_perm=[4, 1, 6, 3, 0, 5, 2, 7],
         corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[5, 1, 2, 3, 8, 4, 6, 7, 0, 9, 10, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    )
-    
-    moves["F'"] = Move("F'",
-        corner_perm=[4, 0, 2, 3, 5, 1, 6, 7],
-        corner_orient_delta=[2, 1, 0, 0, 1, 2, 0, 0],
-        edge_perm=[5, 1, 2, 3, 8, 0, 6, 7, 4, 9, 10, 11],
+        edge_perm=[8, 1, 2, 3, 5, 4, 6, 7, 0, 9, 10, 11],
         edge_orient_delta=[1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0]
     )
     
-    # B move (clockwise, viewed from back)
-    # Corners: 2->3->7->6->2, with orientation changes
-    # Edges: UB->BR->DB->BL->UB (paper order: 2->6->10->7->2), with orientation changes
-    moves['B'] = Move('B',
-        corner_perm=[0, 1, 3, 7, 4, 5, 2, 6],
-        corner_orient_delta=[0, 0, 1, 2, 0, 0, 2, 1],
-        edge_perm=[0, 1, 6, 3, 4, 5, 2, 10, 8, 9, 7, 11],
-        edge_orient_delta=[0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0]
-    )
-    
-    moves['B2'] = Move('B2',
-        corner_perm=[0, 1, 7, 6, 4, 5, 3, 2],
-        corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
-        edge_perm=[0, 1, 7, 3, 4, 5, 10, 6, 8, 9, 2, 11],
-        edge_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    moves["F'"] = Move("F'",
+        corner_perm=[2, 1, 4, 3, 6, 5, 0, 7],
+        corner_orient_delta=[1, 0, 2, 0, 1, 0, 2, 0],
+        edge_perm=[4, 1, 2, 3, 8, 0, 6, 7, 5, 9, 10, 11],
+        edge_orient_delta=[1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
     )
     
     moves["B'"] = Move("B'",
-        corner_perm=[0, 1, 6, 2, 4, 5, 7, 3],
-        corner_orient_delta=[0, 0, 2, 1, 0, 0, 1, 2],
-        edge_perm=[0, 1, 7, 3, 4, 5, 10, 2, 8, 9, 6, 11],
+        corner_perm=[0, 7, 2, 1, 4, 3, 6, 5],
+        corner_orient_delta=[0, 2, 0, 1, 0, 2, 0, 1],
+        edge_perm=[0, 1, 6, 3, 4, 5, 10, 2, 8, 9, 7, 11],
+        edge_orient_delta=[0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0]
+    )
+    
+    moves['B2'] = Move('B2',
+        corner_perm=[0, 5, 2, 7, 4, 1, 6, 3],
+        corner_orient_delta=[0, 0, 0, 0, 0, 0, 0, 0],
+        edge_perm=[0, 1, 10, 3, 4, 5, 7, 6, 8, 9, 2, 11],
         edge_orient_delta=[0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0]
+    )
+    
+    moves['B'] = Move('B',
+        corner_perm=[0, 3, 2, 5, 4, 7, 6, 1],
+        corner_orient_delta=[0, 2, 0, 1, 0, 2, 0, 1],
+        edge_perm=[0, 1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11],
+        edge_orient_delta=[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0]
     )
     
     return moves

@@ -19,66 +19,76 @@ U, L, F, R, B, D = 0, 1, 2, 3, 4, 5
 
 # Corner cubie definition: (face1, pos1, face2, pos2, face3, pos3)
 # Each corner is defined by 3 faces and their positions on those faces
+# Corner positions match picture labeling (1-indexed in picture, 0-indexed here):
+# 0: DFR (bottom-front-right, picture vertex 1)
+# 1: DRB (bottom-back-right, picture vertex 2)
+# 2: URF (top-front-right, picture vertex 3)
+# 3: UBR (top-back-right, picture vertex 4)
+# 4: UFL (top-front-left, picture vertex 5)
+# 5: ULB (top-back-left, picture vertex 6)
+# 6: DLF (bottom-front-left, picture vertex 8)
+# 7: DBL (bottom-back-left, picture vertex 7)
 CORNER_DEFINITIONS = [
-    # Corner 0: URF (Up-Right-Front)
-    ((U, 0, 2), (R, 0, 0), (F, 0, 2)),
-    # Corner 1: UFL (Up-Front-Left)
-    ((U, 0, 0), (F, 0, 0), (L, 0, 2)),
-    # Corner 2: ULB (Up-Left-Back)
-    ((U, 2, 0), (L, 0, 0), (B, 0, 2)),
-    # Corner 3: UBR (Up-Back-Right)
-    ((U, 2, 2), (B, 0, 0), (R, 0, 2)),
-    # Corner 4: DFR (Down-Front-Right)
+    # Corner 0: DFR (Down-Front-Right) - picture vertex 1
     ((D, 0, 2), (F, 2, 2), (R, 2, 0)),
-    # Corner 5: DLF (Down-Left-Front)
-    ((D, 0, 0), (L, 2, 2), (F, 2, 0)),
-    # Corner 6: DBL (Down-Back-Left)
-    ((D, 2, 0), (B, 2, 2), (L, 2, 0)),
-    # Corner 7: DRB (Down-Right-Back)
+    # Corner 1: DRB (Down-Right-Back) - picture vertex 2
     ((D, 2, 2), (R, 2, 2), (B, 2, 0)),
+    # Corner 2: URF (Up-Right-Front) - picture vertex 3
+    ((U, 2, 2), (R, 0, 0), (F, 0, 2)),  # URF: top-right of U face
+    # Corner 3: UBR (Up-Back-Right) - picture vertex 4
+    ((U, 0, 2), (B, 0, 0), (R, 0, 2)),  # UBR: top-right of U face (back-right)
+    # Corner 4: UFL (Up-Front-Left) - picture vertex 5
+    ((U, 2, 0), (F, 0, 0), (L, 0, 2)),  # UFL: top-left of U face
+    # Corner 5: ULB (Up-Left-Back) - picture vertex 6
+    ((U, 0, 0), (L, 0, 0), (B, 0, 2)),  # ULB: top-left of U face (back-left)
+    # Corner 6: DLF (Down-Left-Front) - picture vertex 8
+    ((D, 0, 0), (L, 2, 2), (F, 2, 0)),
+    # Corner 7: DBL (Down-Back-Left) - picture vertex 7
+    ((D, 2, 0), (B, 2, 2), (L, 2, 0)),
 ]
 
 # Edge cubie definition: (face1, pos1, face2, pos2)
 # Paper order: uf, ur, ub, ul, lf, fr, rb, bl, df, dr, db, dl
 EDGE_DEFINITIONS = [
     # Edge 0: UF (Up-Front) - paper index 1
-    ((U, 1, 2), (F, 0, 1)),
+    ((U, 2, 1), (F, 0, 1)),  # bottom-middle of U, top-middle of F
     # Edge 1: UR (Up-Right) - paper index 2
-    ((U, 0, 1), (R, 0, 1)),
+    ((U, 1, 2), (R, 0, 1)),  # right-middle of U, top-middle of R
     # Edge 2: UB (Up-Back) - paper index 3
-    ((U, 2, 1), (B, 0, 1)),
+    ((U, 0, 1), (B, 0, 1)),  # top-middle of U, top-middle of B
     # Edge 3: UL (Up-Left) - paper index 4
-    ((U, 1, 0), (L, 0, 1)),
+    ((U, 1, 0), (L, 0, 1)),  # left-middle of U, top-middle of L
     # Edge 4: FL (Front-Left, paper calls it "lf") - paper index 5
-    ((F, 1, 0), (L, 1, 2)),
+    ((F, 1, 0), (L, 1, 2)),  # left-middle of F, right-middle of L
     # Edge 5: FR (Front-Right) - paper index 6
-    ((F, 1, 2), (R, 1, 0)),
+    ((F, 1, 2), (R, 1, 0)),  # right-middle of F, left-middle of R
     # Edge 6: BR (Back-Right, paper calls it "rb") - paper index 7
-    ((B, 1, 0), (R, 1, 2)),
+    ((B, 1, 0), (R, 1, 2)),  # left-middle of B, right-middle of R
     # Edge 7: BL (Back-Left) - paper index 8
-    ((B, 1, 2), (L, 1, 0)),
+    ((B, 1, 2), (L, 1, 0)),  # right-middle of B, left-middle of L
     # Edge 8: DF (Down-Front) - paper index 9
-    ((D, 1, 2), (F, 2, 1)),
+    ((D, 0, 1), (F, 2, 1)),  # top-middle of D, bottom-middle of F
     # Edge 9: DR (Down-Right) - paper index 10
-    ((D, 0, 1), (R, 2, 1)),
+    ((D, 1, 2), (R, 2, 1)),  # right-middle of D, bottom-middle of R
     # Edge 10: DB (Down-Back) - paper index 11
-    ((D, 2, 1), (B, 2, 1)),
+    ((D, 2, 1), (B, 2, 1)),  # bottom-middle of D, bottom-middle of B
     # Edge 11: DL (Down-Left) - paper index 12
-    ((D, 1, 0), (L, 2, 1)),
+    ((D, 1, 0), (L, 2, 1)),  # left-middle of D, bottom-middle of L
 ]
 
 # Solved state: each cubie has specific colors
 # Corner colors in solved state (order matches CORNER_DEFINITIONS: face order in definition)
 # Standard: White=U, Yellow=D, Green=F, Blue=B, Orange=L, Red=R
+# Order matches new corner labeling (picture vertices 1-8, 0-indexed here)
 SOLVED_CORNER_COLORS = [
-    ['W', 'R', 'G'],  # URF: White-Up, Red-Right, Green-Front
-    ['W', 'G', 'O'],  # UFL: White-Up, Green-Front, Orange-Left
-    ['W', 'O', 'B'],  # ULB: White-Up, Orange-Left, Blue-Back
-    ['W', 'B', 'R'],  # UBR: White-Up, Blue-Back, Red-Right
-    ['Y', 'G', 'R'],  # DFR: Yellow-Down, Green-Front, Red-Right
-    ['Y', 'O', 'G'],  # DLF: Yellow-Down, Orange-Left, Green-Front
-    ['Y', 'B', 'O'],  # DBL: Yellow-Down, Blue-Back, Orange-Left
-    ['Y', 'R', 'B'],  # DRB: Yellow-Down, Red-Right, Blue-Back
+    ['Y', 'G', 'R'],  # Position 0: DFR (picture vertex 1): Yellow-Down, Green-Front, Red-Right
+    ['Y', 'R', 'B'],  # Position 1: DRB (picture vertex 2): Yellow-Down, Red-Right, Blue-Back
+    ['W', 'R', 'G'],  # Position 2: URF (picture vertex 3): White-Up, Red-Right, Green-Front
+    ['W', 'B', 'R'],  # Position 3: UBR (picture vertex 4): White-Up, Blue-Back, Red-Right
+    ['W', 'G', 'O'],  # Position 4: UFL (picture vertex 5): White-Up, Green-Front, Orange-Left
+    ['W', 'O', 'B'],  # Position 5: ULB (picture vertex 6): White-Up, Orange-Left, Blue-Back
+    ['Y', 'O', 'G'],  # Position 6: DLF (picture vertex 8): Yellow-Down, Orange-Left, Green-Front
+    ['Y', 'B', 'O'],  # Position 7: DBL (picture vertex 7): Yellow-Down, Blue-Back, Orange-Left
 ]
 
 # Corner orientation definition based on paper's '+' markers
@@ -90,27 +100,29 @@ SOLVED_CORNER_COLORS = [
 # Orientation 2: reference facet rotated counterclockwise to a side face
 
 # Reference facet color for each corner cubie (the color on the U/D face in solved state)
+# Order matches new corner labeling (picture vertices 1-8, 0-indexed here)
 CORNER_REFERENCE_COLORS = [
-    'W',  # Cubie 0 (URF): reference is White (on U)
-    'W',  # Cubie 1 (UFL): reference is White (on U)
-    'W',  # Cubie 2 (ULB): reference is White (on U)
-    'W',  # Cubie 3 (UBR): reference is White (on U)
-    'Y',  # Cubie 4 (DFR): reference is Yellow (on D)
-    'Y',  # Cubie 5 (DLF): reference is Yellow (on D)
-    'Y',  # Cubie 6 (DBL): reference is Yellow (on D)
-    'Y',  # Cubie 7 (DRB): reference is Yellow (on D)
+    'Y',  # Position 0 (DFR, picture vertex 1): reference is Yellow (on D)
+    'Y',  # Position 1 (DRB, picture vertex 2): reference is Yellow (on D)
+    'W',  # Position 2 (URF, picture vertex 3): reference is White (on U)
+    'W',  # Position 3 (UBR, picture vertex 4): reference is White (on U)
+    'W',  # Position 4 (UFL, picture vertex 5): reference is White (on U)
+    'W',  # Position 5 (ULB, picture vertex 6): reference is White (on U)
+    'Y',  # Position 6 (DLF, picture vertex 8): reference is Yellow (on D)
+    'Y',  # Position 7 (DBL, picture vertex 7): reference is Yellow (on D)
 ]
 
 # For each corner position, which face index should have the reference facet (U or D)
+# Order matches new corner labeling (picture vertices 1-8, 0-indexed here)
 CORNER_REFERENCE_FACES = [
-    U,  # Position 0 (URF): reference should be on U
-    U,  # Position 1 (UFL): reference should be on U
-    U,  # Position 2 (ULB): reference should be on U
-    U,  # Position 3 (UBR): reference should be on U
-    D,  # Position 4 (DFR): reference should be on D
-    D,  # Position 5 (DLF): reference should be on D
-    D,  # Position 6 (DBL): reference should be on D
-    D,  # Position 7 (DRB): reference should be on D
+    D,  # Position 0 (DFR, picture vertex 1): reference should be on D
+    D,  # Position 1 (DRB, picture vertex 2): reference should be on D
+    U,  # Position 2 (URF, picture vertex 3): reference should be on U
+    U,  # Position 3 (UBR, picture vertex 4): reference should be on U
+    U,  # Position 4 (UFL, picture vertex 5): reference should be on U
+    U,  # Position 5 (ULB, picture vertex 6): reference should be on U
+    D,  # Position 6 (DLF, picture vertex 8): reference should be on D
+    D,  # Position 7 (DBL, picture vertex 7): reference should be on D
 ]
 
 # Edge colors in solved state
@@ -150,11 +162,11 @@ EDGE_REFERENCE_FACES = [
     L,  # Edge 4 (FL): reference on L face (lf)
     F,  # Edge 5 (FR): reference on F face (fr)
     R,  # Edge 6 (BR): reference on R face (rb)
-    L,  # Edge 7 (BL): reference on L face (bl)
+    B,  # Edge 7 (BL): reference on B face (bl)
     F,  # Edge 8 (DF): reference on F face (df)
     R,  # Edge 9 (DR): reference on R face (dr)
-    B,  # Edge 10 (DB): reference on B face (db)
-    L,  # Edge 11 (DL): reference on L face (dl)
+    D,  # Edge 10 (DB): reference on D face (db)
+    D,  # Edge 11 (DL): reference on D face (dl)
 ]
 
 # For each edge position, which face should have the reference facet
@@ -168,11 +180,11 @@ EDGE_POSITION_REFERENCE_FACES = [
     L,  # Position 4 (FL): reference should be on L (lf)
     F,  # Position 5 (FR): reference should be on F
     R,  # Position 6 (BR): reference should be on R (rb)
-    L,  # Position 7 (BL): reference should be on L (bl)
+    B,  # Position 7 (BL): reference should be on B (bl)
     F,  # Position 8 (DF): reference should be on F
     R,  # Position 9 (DR): reference should be on R
-    B,  # Position 10 (DB): reference should be on B (db)
-    L,  # Position 11 (DL): reference should be on L (dl)
+    D,  # Position 10 (DB): reference should be on D (db)
+    D,  # Position 11 (DL): reference should be on D (dl)
 ]
 
 # Reference color for each edge cubie (the color on the reference face in solved state)
@@ -185,11 +197,11 @@ EDGE_REFERENCE_COLORS = [
     'O',  # Edge 4 (FL): reference is Orange (on L, lf)
     'G',  # Edge 5 (FR): reference is Green (on F)
     'R',  # Edge 6 (BR): reference is Red (on R, rb)
-    'O',  # Edge 7 (BL): reference is Orange (on L, bl)
+    'B',  # Edge 7 (BL): reference is Blue (on B, bl)
     'G',  # Edge 8 (DF): reference is Green (on F)
     'R',  # Edge 9 (DR): reference is Red (on R)
-    'B',  # Edge 10 (DB): reference is Blue (on B, db)
-    'O',  # Edge 11 (DL): reference is Orange (on L, dl)
+    'Y',  # Edge 10 (DB): reference is Yellow (on D, db)
+    'Y',  # Edge 11 (DL): reference is Yellow (on D, dl)
 ]
 
 
@@ -227,8 +239,8 @@ def faces_to_cubie_state(faces):
         # Find which cubie this is
         cubie_idx, orientation = find_corner_cubie(colors, face_indices, corner_pos)
         if cubie_idx is None:
-            # Debug: print which corner failed
-            corner_names = ['URF', 'UFL', 'ULB', 'UBR', 'DFR', 'DLF', 'DBL', 'DRB']
+            # Debug: print which corner failed (order matches new corner position labeling)
+            corner_names = ['DFR', 'DRB', 'URF', 'UBR', 'UFL', 'ULB', 'DLF', 'DBL']
             print(f"Failed to match corner {corner_names[corner_pos]} with colors {colors}")
             return None  # Invalid state
         
@@ -438,13 +450,13 @@ def cubie_state_to_faces(state: CubeState):
         corner_def = CORNER_DEFINITIONS[pos]
         solved_colors = SOLVED_CORNER_COLORS[cubie]
         
-        # New orientation system based on paper's '+' markers:
-        # Orientation 0: reference facet (marked with +) is on U or D face
-        # Orientation 1: reference facet rotated clockwise to a side face  
-        # Orientation 2: reference facet rotated counterclockwise to a side face
-        # 
-        # The reference facet is always the first color in solved_colors (U or D color)
-        # We need to rotate the colors so the reference facet ends up on the correct face
+        # Orientation system: the plus sign moves with the cubie
+        # Orientation 0: reference facet (plus sign) is where it should be (on U or D face at this position)
+        # Orientation 1: reference facet rotated clockwise from where it should be
+        # Orientation 2: reference facet rotated counterclockwise from where it should be
+        
+        # Get the reference color for this cubie (the plus sign color)
+        reference_color = CORNER_REFERENCE_COLORS[cubie]
         
         # Expected face for reference facet at this position (U or D)
         expected_ref_face = CORNER_REFERENCE_FACES[pos]
@@ -460,17 +472,33 @@ def cubie_state_to_faces(state: CubeState):
             # Shouldn't happen - every corner position has U or D face
             ref_face_idx = 0
         
-        # The reference color (solved_colors[0]) should be at ref_face_idx when orient=0
-        # With orientation, the reference rotates:
-        # orient=0: reference at ref_face_idx (no rotation from base)
-        # orient=1: reference rotated CW from ref_face_idx -> at (ref_face_idx + 1) % 3
-        # orient=2: reference rotated CCW from ref_face_idx -> at (ref_face_idx + 2) % 3
+        # Find where the reference color is in solved_colors
+        ref_color_idx = None
+        for i, color in enumerate(solved_colors):
+            if color == reference_color:
+                ref_color_idx = i
+                break
         
-        # Calculate where reference should be with this orientation
+        if ref_color_idx is None:
+            # Shouldn't happen
+            ref_color_idx = 0
+        
+        # The orientation tells us how much the cubie has rotated from where it should be
+        # orient=0: reference should be at ref_face_idx (correct orientation)
+        # orient=1: cubie rotated CW, so reference is now at (ref_face_idx + 1) % 3
+        # orient=2: cubie rotated CCW, so reference is now at (ref_face_idx + 2) % 3
+        # So the reference color is currently at position (ref_face_idx + orient) % 3 in corner_def
+        
+        # We need to rotate solved_colors so that:
+        # The reference color (at ref_color_idx in solved_colors) ends up at position (ref_face_idx + orient) % 3
         target_ref_idx = (ref_face_idx + orient) % 3
         
-        # Rotate colors so reference (index 0) goes to target_ref_idx
-        rotation = (3 - target_ref_idx) % 3
+        # Calculate rotation needed: we want ref_color_idx to end up at target_ref_idx
+        # If ref_color_idx is at position i, and we want it at position j,
+        # we need to rotate by (j - i) mod 3
+        rotation = (target_ref_idx - ref_color_idx) % 3
+        
+        # Rotate colors
         rotated_colors = solved_colors[rotation:] + solved_colors[:rotation]
         
         # Place colors on faces
@@ -486,55 +514,43 @@ def cubie_state_to_faces(state: CubeState):
         edge_def = EDGE_DEFINITIONS[pos]
         solved_colors = SOLVED_EDGE_COLORS[cubie]
         
-        # New orientation system based on paper's '+' markers:
-        # Orientation 0: reference facet (marked with +) is on the correct face
-        # Orientation 1: reference facet is flipped to the other face
-        #
-        # The reference facet is the one with the reference color
-        # We need to place it on the correct face based on orientation
+        # Algorithm:
+        # 1. Place the edge cubie at its position (as edge_perm shows)
+        # 2. Put the color that has the + sign (reference color) on the face where the position initially has the + sign
+        # 3. If orient == 1, then reverse/flip the colors
         
-        # Expected face for reference facet at this position
-        expected_ref_face = EDGE_POSITION_REFERENCE_FACES[pos]
-        
-        # Find which position in edge_def has the expected reference face
-        ref_face_idx = None
-        for i, (face_idx, row, col) in enumerate(edge_def):
-            if face_idx == expected_ref_face:
-                ref_face_idx = i
-                break
-        
-        if ref_face_idx is None:
-            # Shouldn't happen - every edge position has both faces defined
-            ref_face_idx = 0
-        
-        # Get the reference color for this cubie
+        # Get the reference color for this cubie (the color with the + sign)
         reference_color = EDGE_REFERENCE_COLORS[cubie]
         
-        # Find which position in solved_colors has the reference color
+        # Find which index in solved_colors has the reference color
         ref_color_idx = None
         for i, color in enumerate(solved_colors):
             if color == reference_color:
                 ref_color_idx = i
                 break
-        
         if ref_color_idx is None:
-            # Shouldn't happen
             ref_color_idx = 0
         
-        # If orientation is 0, reference should be at ref_face_idx
-        # If orientation is 1, reference should be at the other position
-        if orient == 0:
-            # Reference at ref_face_idx: place reference color at ref_face_idx
-            if ref_color_idx == ref_face_idx:
-                colors = solved_colors
-            else:
-                colors = solved_colors[::-1]
-        else:  # orient == 1
-            # Reference flipped: place reference color at the other position
-            if ref_color_idx == ref_face_idx:
-                colors = solved_colors[::-1]
-            else:
-                colors = solved_colors
+        # Get the position's reference face (where the + sign should be initially)
+        pos_ref_face = EDGE_POSITION_REFERENCE_FACES[pos]
+        
+        # Find which index in edge_def has the position's reference face
+        pos_ref_idx = None
+        for i, (face_idx, row, col) in enumerate(edge_def):
+            if face_idx == pos_ref_face:
+                pos_ref_idx = i
+                break
+        if pos_ref_idx is None:
+            pos_ref_idx = 0
+        
+        # Step 1 & 2: Place reference color at position's reference face
+        colors = [None, None]
+        colors[pos_ref_idx] = solved_colors[ref_color_idx]
+        colors[1 - pos_ref_idx] = solved_colors[1 - ref_color_idx]
+        
+        # Step 3: If orient == 1, reverse the colors
+        if orient == 1:
+            colors = colors[::-1]
         
         # Place colors on faces
         for i, (face_idx, row, col) in enumerate(edge_def):

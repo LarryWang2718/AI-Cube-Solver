@@ -19,26 +19,26 @@ Each move is represented by **4 arrays** that describe how the move transforms t
 
 **Example for U move:**
 ```python
-corner_perm = [1, 2, 3, 0, 4, 5, 6, 7]
+corner_perm = [0, 1, 4, 2, 5, 3, 6, 7]
 ```
 
 This means:
-- Position 0 → Position 1 (corner at URF moves to UFL)
-- Position 1 → Position 2 (corner at UFL moves to ULB)
-- Position 2 → Position 3 (corner at ULB moves to UBR)
-- Position 3 → Position 0 (corner at UBR moves to URF)
-- Positions 4-7 stay the same (bottom corners don't move)
+- Position 2 (URF) → Position 4 (UFL)
+- Position 4 (UFL) → Position 5 (ULB)
+- Position 5 (ULB) → Position 3 (UBR)
+- Position 3 (UBR) → Position 2 (URF)
+- Positions 0, 1, 6, 7 stay the same (bottom corners don't move)
 
 **Corner positions (0-7):**
 ```
-0: URF (Up-Right-Front)
-1: UFL (Up-Front-Left)
-2: ULB (Up-Left-Back)
+0: DFR (Down-Front-Right)
+1: DRB (Down-Right-Back)
+2: URF (Up-Right-Front)
 3: UBR (Up-Back-Right)
-4: DFR (Down-Front-Right)
-5: DLF (Down-Left-Front)
-6: DBL (Down-Back-Left)
-7: DRB (Down-Right-Back)
+4: UFL (Up-Front-Left)
+5: ULB (Up-Left-Back)
+6: DLF (Down-Left-Front)
+7: DBL (Down-Back-Left)
 ```
 
 ### 2. `corner_orient_delta` (Corner Orientation Change)
@@ -72,30 +72,30 @@ This means:
 
 **Example for U move:**
 ```python
-edge_perm = [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]
+edge_perm = [3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]
 ```
 
 This means:
-- Position 0 → Position 1 (edge UR moves to UF)
-- Position 1 → Position 2 (edge UF moves to UL)
-- Position 2 → Position 3 (edge UL moves to UB)
-- Position 3 → Position 0 (edge UB moves to UR)
+- Position 0 (UF) → Position 1 (UR)
+- Position 1 (UR) → Position 2 (UB)
+- Position 2 (UB) → Position 3 (UL)
+- Position 3 (UL) → Position 0 (UF)
 - Positions 4-11 stay the same (middle and bottom edges don't move)
 
 **Edge positions (0-11):**
 ```
-0: UR (Up-Right)
-1: UF (Up-Front)
-2: UL (Up-Left)
-3: UB (Up-Back)
-4: DR (Down-Right)
-5: DF (Down-Front)
-6: DL (Down-Left)
-7: DB (Down-Back)
-8: FR (Front-Right)
-9: FL (Front-Left)
-10: BL (Back-Left)
-11: BR (Back-Right)
+0: UF (Up-Front)
+1: UR (Up-Right)
+2: UB (Up-Back)
+3: UL (Up-Left)
+4: FL (Front-Left)
+5: FR (Front-Right)
+6: BR (Back-Right)
+7: BL (Back-Left)
+8: DF (Down-Front)
+9: DR (Down-Right)
+10: DB (Down-Back)
+11: DL (Down-Left)
 ```
 
 ### 4. `edge_orient_delta` (Edge Orientation Change)
@@ -173,23 +173,23 @@ Let's walk through creating the **U move** step by step:
 ### Step 1: Identify Which Cubies Move
 
 **U move rotates the top face clockwise:**
-- Top 4 corners: URF → UFL → ULB → UBR → URF
-- Top 4 edges: UR → UF → UL → UB → UR
+- Top 4 corners: URF(2) → UFL(4) → ULB(5) → UBR(3) → URF(2)
+- Top 4 edges: UF(0) → UR(1) → UB(2) → UL(3) → UF(0)
 
 ### Step 2: Create Corner Permutation
 
 **Corner positions:**
 ```
-0: URF → moves to position 1 (UFL)
-1: UFL → moves to position 2 (ULB)
-2: ULB → moves to position 3 (UBR)
-3: UBR → moves to position 0 (URF)
-4-7: Don't move
+2: URF → moves to position 4 (UFL)
+4: UFL → moves to position 5 (ULB)
+5: ULB → moves to position 3 (UBR)
+3: UBR → moves to position 2 (URF)
+0, 1, 6, 7: Don't move
 ```
 
 **Result:**
 ```python
-corner_perm = [1, 2, 3, 0, 4, 5, 6, 7]
+corner_perm = [0, 1, 4, 2, 5, 3, 6, 7]
 ```
 
 ### Step 3: Create Corner Orientation Delta
@@ -206,16 +206,16 @@ corner_orient_delta = [0, 0, 0, 0, 0, 0, 0, 0]
 
 **Edge positions:**
 ```
-0: UR → moves to position 1 (UF)
-1: UF → moves to position 2 (UL)
-2: UL → moves to position 3 (UB)
-3: UB → moves to position 0 (UR)
+0: UF → moves to position 1 (UR)
+1: UR → moves to position 2 (UB)
+2: UB → moves to position 3 (UL)
+3: UL → moves to position 0 (UF)
 4-11: Don't move
 ```
 
 **Result:**
 ```python
-edge_perm = [1, 2, 3, 0, 4, 5, 6, 7, 8, 9, 10, 11]
+edge_perm = [3, 0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]
 ```
 
 ### Step 5: Create Edge Orientation Delta
@@ -236,73 +236,64 @@ The **F move** (Front face clockwise) is more complex because it involves orient
 ### Step 1: Identify Moving Cubies
 
 **Corners:**
-- URF → UFL → DLF → DFR → URF
+- URF(2) → DFR(0) → DLF(6) → UFL(4) → URF(2)
 
 **Edges:**
-- UF → FL → DF → FR → UF
+- UF(0) → FR(5) → DF(8) → FL(4) → UF(0)
 
 ### Step 2: Corner Permutation
 
 ```
-0: URF → moves to position 1 (UFL)
-1: UFL → moves to position 5 (DLF)
-5: DLF → moves to position 4 (DFR)
-4: DFR → moves to position 0 (URF)
+2: URF → moves to position 0 (DFR)
+0: DFR → moves to position 6 (DLF)
+6: DLF → moves to position 4 (UFL)
+4: UFL → moves to position 2 (URF)
 Others: Don't move
 ```
 
 **Result:**
 ```python
-corner_perm = [1, 5, 2, 3, 0, 4, 6, 7]
-# Wait, that's not right! Let me think...
-
-# Actually, we need to think about where each POSITION gets its cubie FROM:
-# Position 0 (URF) gets cubie from position 4 (DFR)
-# Position 1 (UFL) gets cubie from position 0 (URF)
-# Position 4 (DFR) gets cubie from position 5 (DLF)
-# Position 5 (DLF) gets cubie from position 1 (UFL)
-
-corner_perm = [1, 5, 2, 3, 0, 4, 6, 7]
+corner_perm = [6, 1, 0, 3, 2, 5, 4, 7]
 ```
 
 ### Step 3: Corner Orientation Delta
 
 **When corners move to F face positions, they twist:**
-- URF (position 0): moves to UFL, twists clockwise → delta = 1
-- UFL (position 1): moves to DLF, twists counterclockwise → delta = 2
-- DFR (position 4): moves to URF, twists counterclockwise → delta = 2
-- DLF (position 5): moves to DFR, twists clockwise → delta = 1
+- DFR (position 0): moves to DLF, twists → delta = 1
+- URF (position 2): moves to DFR, twists → delta = 1
+- UFL (position 4): moves to URF, twists → delta = 1
+- DLF (position 6): moves to UFL, twists → delta = 2
 
 **Result:**
 ```python
-corner_orient_delta = [1, 2, 0, 0, 2, 1, 0, 0]
+corner_orient_delta = [1, 0, 1, 0, 1, 0, 2, 0]
 ```
 
 ### Step 4: Edge Permutation
 
 ```
-1: UF → moves to position 9 (FL)
-9: FL → moves to position 5 (DF)
-5: DF → moves to position 8 (FR)
-8: FR → moves to position 1 (UF)
+0: UF → moves to position 5 (FR)
+5: FR → moves to position 8 (DF)
+8: DF → moves to position 4 (FL)
+4: FL → moves to position 0 (UF)
 ```
 
 **Result:**
 ```python
-edge_perm = [0, 9, 2, 3, 4, 8, 6, 7, 5, 1, 10, 11]
+edge_perm = [5, 1, 2, 3, 0, 8, 6, 7, 4, 9, 10, 11]
 ```
 
 ### Step 5: Edge Orientation Delta
 
 **When edges move to F face positions, they flip:**
-- UF (position 1): flips → delta = 1
-- DF (position 5): flips → delta = 1
-- FR (position 8): flips → delta = 1
-- FL (position 9): flips → delta = 1
+- UF (position 0): no flip → delta = 0
+- FR (position 5): flips → delta = 1
+- DF (position 8): no flip → delta = 0
+- FL (position 4): flips → delta = 1
 
 **Result:**
 ```python
-edge_orient_delta = [0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0]
+edge_orient_delta = [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0]
 ```
 
 ---

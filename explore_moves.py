@@ -32,7 +32,8 @@ def explore_move(move_name):
     print("\n📦 CORNER PERMUTATION:")
     print(f"  corner_perm = {list(move.corner_perm)}")
     print("\n  What this means:")
-    corner_names = ['URF', 'UFL', 'ULB', 'UBR', 'DFR', 'DLF', 'DBL', 'DRB']
+    # Corner names match new labeling (picture vertices 1-8, 0-indexed here)
+    corner_names = ['DFR', 'DRB', 'URF', 'UBR', 'UFL', 'ULB', 'DLF', 'DBL']
     for i, target in enumerate(move.corner_perm):
         if i != target:
             print(f"    Position {i} ({corner_names[i]}) → Position {target} ({corner_names[target]})")
@@ -110,7 +111,8 @@ def compare_moves():
     u_move = MOVE_TABLE['U']
     f_move = MOVE_TABLE['F']
     
-    corner_names = ['URF', 'UFL', 'ULB', 'UBR', 'DFR', 'DLF', 'DBL', 'DRB']
+    # Corner names match new labeling (picture vertices 1-8, 0-indexed here)
+    corner_names = ['DFR', 'DRB', 'URF', 'UBR', 'UFL', 'ULB', 'DLF', 'DBL']
     edge_names = ['UR', 'UF', 'UL', 'UB', 'DR', 'DF', 'DL', 'DB', 'FR', 'FL', 'BL', 'BR']
     
     print("\nU MOVE:")
