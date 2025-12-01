@@ -151,57 +151,57 @@ SOLVED_EDGE_COLORS = [
 # Orientation 1: reference facet is flipped to the other face
 
 # For each edge cubie, which face should have the reference facet (the one with +)
+# New rule: edges with U or D get marked on U or D, remaining edges get F or B
 # Paper order: uf, ur, ub, ul, lf, fr, rb, bl, df, dr, db, dl
-# Based on paper: '+' on UR, UF, FR, DF, DR (on F/R/U faces)
-#                 '+' on dl, db, lf, lu, bl, bu (on other faces)
 EDGE_REFERENCE_FACES = [
-    U,  # Edge 0 (UF): reference on U face (uf)
-    U,  # Edge 1 (UR): reference on U face (ur)
-    B,  # Edge 2 (UB): reference on B face (bu)
-    L,  # Edge 3 (UL): reference on L face (lu)
-    L,  # Edge 4 (FL): reference on L face (lf)
-    F,  # Edge 5 (FR): reference on F face (fr)
-    R,  # Edge 6 (BR): reference on R face (rb)
-    B,  # Edge 7 (BL): reference on B face (bl)
-    F,  # Edge 8 (DF): reference on F face (df)
-    R,  # Edge 9 (DR): reference on R face (dr)
-    D,  # Edge 10 (DB): reference on D face (db)
-    D,  # Edge 11 (DL): reference on D face (dl)
+    U,  # Edge 0 (UF): reference on U face
+    U,  # Edge 1 (UR): reference on U face
+    U,  # Edge 2 (UB): reference on U face (changed from B)
+    U,  # Edge 3 (UL): reference on U face (changed from L)
+    F,  # Edge 4 (FL): reference on F face (changed from L)
+    F,  # Edge 5 (FR): reference on F face
+    B,  # Edge 6 (BR): reference on B face (changed from R)
+    B,  # Edge 7 (BL): reference on B face
+    D,  # Edge 8 (DF): reference on D face (changed from F)
+    D,  # Edge 9 (DR): reference on D face (changed from R)
+    D,  # Edge 10 (DB): reference on D face
+    D,  # Edge 11 (DL): reference on D face
 ]
 
 # For each edge position, which face should have the reference facet
+# New rule: edges with U or D get marked on U or D, remaining edges get F or B
 # Paper order: uf, ur, ub, ul, lf, fr, rb, bl, df, dr, db, dl
-# This is based on the position's definition and the paper's rules
 EDGE_POSITION_REFERENCE_FACES = [
     U,  # Position 0 (UF): reference should be on U
     U,  # Position 1 (UR): reference should be on U
-    B,  # Position 2 (UB): reference should be on B (bu)
-    L,  # Position 3 (UL): reference should be on L (lu)
-    L,  # Position 4 (FL): reference should be on L (lf)
+    U,  # Position 2 (UB): reference should be on U (changed from B)
+    U,  # Position 3 (UL): reference should be on U (changed from L)
+    F,  # Position 4 (FL): reference should be on F (changed from L)
     F,  # Position 5 (FR): reference should be on F
-    R,  # Position 6 (BR): reference should be on R (rb)
-    B,  # Position 7 (BL): reference should be on B (bl)
-    F,  # Position 8 (DF): reference should be on F
-    R,  # Position 9 (DR): reference should be on R
-    D,  # Position 10 (DB): reference should be on D (db)
-    D,  # Position 11 (DL): reference should be on D (dl)
+    B,  # Position 6 (BR): reference should be on B (changed from R)
+    B,  # Position 7 (BL): reference should be on B
+    D,  # Position 8 (DF): reference should be on D (changed from F)
+    D,  # Position 9 (DR): reference should be on D (changed from R)
+    D,  # Position 10 (DB): reference should be on D
+    D,  # Position 11 (DL): reference should be on D
 ]
 
 # Reference color for each edge cubie (the color on the reference face in solved state)
+# Updated to match new reference face assignments
 # Paper order: uf, ur, ub, ul, lf, fr, rb, bl, df, dr, db, dl
 EDGE_REFERENCE_COLORS = [
     'W',  # Edge 0 (UF): reference is White (on U)
     'W',  # Edge 1 (UR): reference is White (on U)
-    'B',  # Edge 2 (UB): reference is Blue (on B, bu)
-    'O',  # Edge 3 (UL): reference is Orange (on L, lu)
-    'O',  # Edge 4 (FL): reference is Orange (on L, lf)
+    'W',  # Edge 2 (UB): reference is White (on U, changed from Blue)
+    'W',  # Edge 3 (UL): reference is White (on U, changed from Orange)
+    'G',  # Edge 4 (FL): reference is Green (on F, changed from Orange)
     'G',  # Edge 5 (FR): reference is Green (on F)
-    'R',  # Edge 6 (BR): reference is Red (on R, rb)
-    'B',  # Edge 7 (BL): reference is Blue (on B, bl)
-    'G',  # Edge 8 (DF): reference is Green (on F)
-    'R',  # Edge 9 (DR): reference is Red (on R)
-    'Y',  # Edge 10 (DB): reference is Yellow (on D, db)
-    'Y',  # Edge 11 (DL): reference is Yellow (on D, dl)
+    'B',  # Edge 6 (BR): reference is Blue (on B, changed from Red)
+    'B',  # Edge 7 (BL): reference is Blue (on B)
+    'Y',  # Edge 8 (DF): reference is Yellow (on D, changed from Green)
+    'Y',  # Edge 9 (DR): reference is Yellow (on D, changed from Red)
+    'Y',  # Edge 10 (DB): reference is Yellow (on D)
+    'Y',  # Edge 11 (DL): reference is Yellow (on D)
 ]
 
 

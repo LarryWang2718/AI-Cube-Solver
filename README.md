@@ -9,9 +9,7 @@ An AI agent that solves the Rubik's Cube using IDA* search with pattern database
   - Corner Orientation PDB (3^7 = 2,187 states)
   - Edge Orientation PDB (2^11 = 2,048 states)
   - Corner Permutation PDB (8! = 40,320 states)
-- **Search Algorithms**:
-  - IDDFS (Iterative Deepening DFS) - baseline
-  - IDA* (Iterative Deepening A*) - main algorithm with admissible heuristics
+- **Search Algorithm**: IDA* (Iterative Deepening A*) with admissible heuristics
 - **Move pruning**: Avoids immediate inverse moves to reduce branching factor
 
 ## Installation
@@ -60,11 +58,9 @@ python main.py --help
 ```
 
 Options:
-- `--algorithm {iddfs,idastar}`: Choose search algorithm (default: idastar)
 - `--scramble N`: Number of random moves for scrambling (default: 25)
 - `--seed N`: Random seed for reproducible scrambles
 - `--moves "U R F2 ..."`: Custom scramble as space-separated moves
-- `--max-depth N`: Maximum depth for IDDFS (default: 20)
 - `--max-iterations N`: Maximum iterations for IDA* (default: 50)
 
 ### Examples
@@ -79,10 +75,6 @@ Solve with reproducible random scramble:
 python main.py --scramble 20 --seed 42
 ```
 
-Use IDDFS instead of IDA*:
-```bash
-python main.py --algorithm iddfs --max-depth 15
-```
 
 ## Architecture
 
@@ -90,7 +82,7 @@ python main.py --algorithm iddfs --max-depth 15
 - `moves.py`: Move definitions and application logic
 - `pattern_databases.py`: PDB construction using reverse BFS
 - `heuristics.py`: Heuristic functions using pattern databases
-- `search.py`: IDDFS and IDA* search algorithms
+- `search.py`: IDA* search algorithm
 - `utils.py`: Utility functions (scrambling, move application, verification)
 - `main.py`: Command-line interface
 
@@ -107,7 +99,6 @@ The solver implements the formal model described in the specification:
 
 - Pattern databases are built on first run (may take a few minutes)
 - IDA* typically finds optimal solutions for random scrambles
-- IDDFS is slower but useful for validation
 
 ## Notes
 

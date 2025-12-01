@@ -8,9 +8,6 @@ A cube state is represented as (p_c, o_c, p_e, o_e) where:
 - o_e: edge orientations (0 or 1)
 """
 
-import numpy as np
-from typing import Tuple
-
 
 class CubeState:
     """Represents a 3x3x3 Rubik's Cube state using the cubie model."""
@@ -19,46 +16,46 @@ class CubeState:
     # Edge positions: 12 edges indexed 0-11
     
     def __init__(self, 
-                 corner_perm: np.ndarray = None,
-                 corner_orient: np.ndarray = None,
-                 edge_perm: np.ndarray = None,
-                 edge_orient: np.ndarray = None):
+                 corner_perm: list = None,
+                 corner_orient: list = None,
+                 edge_perm: list = None,
+                 edge_orient: list = None):
         """
         Initialize cube state.
         
         Args:
-            corner_perm: array of 8 integers, corner_perm[i] = j means corner cubie j is at position i
-            corner_orient: array of 8 integers in {0,1,2}, orientation of corner at position i
-            edge_perm: array of 12 integers, edge_perm[i] = j means edge cubie j is at position i
-            edge_orient: array of 12 integers in {0,1}, orientation of edge at position i
+            corner_perm: list of 8 integers, corner_perm[i] = j means corner cubie j is at position i
+            corner_orient: list of 8 integers in {0,1,2}, orientation of corner at position i
+            edge_perm: list of 12 integers, edge_perm[i] = j means edge cubie j is at position i
+            edge_orient: list of 12 integers in {0,1}, orientation of edge at position i
         """
         if corner_perm is None:
             # Solved state
-            self.corner_perm = np.arange(8, dtype=np.int32)
-            self.corner_orient = np.zeros(8, dtype=np.int32)
-            self.edge_perm = np.arange(12, dtype=np.int32)
-            self.edge_orient = np.zeros(12, dtype=np.int32)
+            self.corner_perm = list(range(8))
+            self.corner_orient = [0] * 8
+            self.edge_perm = list(range(12))
+            self.edge_orient = [0] * 12
         else:
-            self.corner_perm = np.array(corner_perm, dtype=np.int32)
-            self.corner_orient = np.array(corner_orient, dtype=np.int32)
-            self.edge_perm = np.array(edge_perm, dtype=np.int32)
-            self.edge_orient = np.array(edge_orient, dtype=np.int32)
+            self.corner_perm = list(corner_perm)
+            self.corner_orient = list(corner_orient)
+            self.edge_perm = list(edge_perm)
+            self.edge_orient = list(edge_orient)
     
     def copy(self):
-        """Create a deep copy of this state."""
-        return CubeState(
-            self.corner_perm.copy(),
-            self.corner_orient.copy(),
-            self.edge_perm.copy(),
-            self.edge_orient.copy()
-        )
+        """Create a copy of this state. Optimized for performance."""
+        s = CubeState.__new__(CubeState)
+        s.corner_perm = self.corner_perm[:]   # list slice copy only
+        s.corner_orient = self.corner_orient[:]
+        s.edge_perm = self.edge_perm[:]
+        s.edge_orient = self.edge_orient[:]
+        return s
     
     def is_solved(self) -> bool:
         """Check if the cube is in the solved state."""
-        return (np.array_equal(self.corner_perm, np.arange(8)) and
-                np.all(self.corner_orient == 0) and
-                np.array_equal(self.edge_perm, np.arange(12)) and
-                np.all(self.edge_orient == 0))
+        return (self.corner_perm == list(range(8)) and
+                all(x == 0 for x in self.corner_orient) and
+                self.edge_perm == list(range(12)) and
+                all(x == 0 for x in self.edge_orient))
     
     def is_valid(self) -> bool:
         """
@@ -74,20 +71,20 @@ class CubeState:
             return False
         
         # Check corner orientation sum
-        if np.sum(self.corner_orient) % 3 != 0:
+        if sum(self.corner_orient) % 3 != 0:
             return False
         
         # Check edge orientation sum
-        if np.sum(self.edge_orient) % 2 != 0:
+        if sum(self.edge_orient) % 2 != 0:
             return False
         
         return True
     
     @staticmethod
-    def _permutation_parity(perm: np.ndarray) -> int:
+    def _permutation_parity(perm: list) -> int:
         """Compute the parity (sign) of a permutation. Returns 0 for even, 1 for odd."""
         n = len(perm)
-        visited = np.zeros(n, dtype=bool)
+        visited = [False] * n
         parity = 0
         
         for i in range(n):
@@ -107,10 +104,10 @@ class CubeState:
         """Check equality of two cube states."""
         if not isinstance(other, CubeState):
             return False
-        return (np.array_equal(self.corner_perm, other.corner_perm) and
-                np.array_equal(self.corner_orient, other.corner_orient) and
-                np.array_equal(self.edge_perm, other.edge_perm) and
-                np.array_equal(self.edge_orient, other.edge_orient))
+        return (self.corner_perm == other.corner_perm and
+                self.corner_orient == other.corner_orient and
+                self.edge_perm == other.edge_perm and
+                self.edge_orient == other.edge_orient)
     
     def __hash__(self):
         """Hash function for use in sets/dicts."""

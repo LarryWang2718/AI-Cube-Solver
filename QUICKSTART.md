@@ -38,11 +38,6 @@ python main.py --scramble 15
 python main.py --scramble 20 --seed 42
 ```
 
-**Use IDDFS algorithm instead of IDA*:**
-```bash
-python main.py --algorithm iddfs --max-depth 15
-```
-
 **Limit IDA* iterations (for faster testing):**
 ```bash
 python main.py --moves "U R" --max-iterations 10
@@ -117,5 +112,4 @@ Solution is correct!
 **Very slow performance**
 - This is normal for the first run (building PDBs)
 - For faster testing, use `--max-iterations 10` or simpler scrambles
-- IDDFS is slower than IDA* for most cases
 

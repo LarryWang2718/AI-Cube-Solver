@@ -13,6 +13,10 @@ from heuristics import Heuristic
 from search import IDAStar
 import threading
 import time
+import subprocess
+import sys
+import os
+import re
 
 
 # Standard Rubik's Cube colors (RGB)
@@ -222,6 +226,7 @@ class CubeSolverGUI:
         self.solver = None
         self.solution = None
         self.solving = False
+        self.current_scramble = None  # Store the current scramble string
         
         # Create main frame
         main_frame = ttk.Frame(root, padding="10")
@@ -340,6 +345,7 @@ class CubeSolverGUI:
         solved = solved_state()
         self.visualizer.faces = cubie_state_to_faces(solved)
         self.visualizer.draw()
+        self.current_scramble = None  # Clear stored scramble
         self.status_label.config(text="Cube reset to solved state")
         self.solution_text.delete(1.0, tk.END)
     
@@ -368,6 +374,8 @@ class CubeSolverGUI:
                     scrambled = apply_moves(state, moves)
                     # Update visualizer
                     self.visualizer.from_cube_state(scrambled)
+                    # Store the scramble string for later use in solving
+                    self.current_scramble = scramble_str
                     self.status_label.config(text=f"Scramble applied: {scramble_str}")
                     self.solution = None
                     self.solution_text.delete(1.0, tk.END)
@@ -379,82 +387,101 @@ class CubeSolverGUI:
         dialog.bind('<Return>', lambda e: apply_scramble())
     
     def solve_cube(self):
-        """Solve the cube."""
+        """Solve the cube using command-line interface."""
         if self.solving:
             messagebox.showwarning("Warning", "Solver is already running!")
             return
         
-        # Convert visual state to cubie model
-        try:
-            state = self.visualizer.to_cube_state()
-            if state is None:
-                messagebox.showerror(
-                    "Cannot Resolve Cube State",
-                    "Could not convert the visual cube to a valid state.\n\n"
-                    "This usually happens when:\n"
-                    "• Colors don't match a valid Rubik's cube configuration\n"
-                    "• Some facelets have incorrect or inconsistent colors\n"
-                    "• The cube configuration violates physical constraints\n\n"
-                    "RECOMMENDED: Use 'Load from Scramble' button instead.\n"
-                    "This guarantees a valid, solvable cube state."
-                )
-                self.status_label.config(text="Error: Cannot resolve cube state")
-                return
-        except Exception as e:
-            messagebox.showerror(
-                "Error",
-                f"Error converting cube state: {e}\n\n"
-                "Please try using 'Load from Scramble' to input a valid cube state."
+        # Check if we have a stored scramble
+        if self.current_scramble is None:
+            messagebox.showwarning(
+                "No Scramble",
+                "Please use 'Load from Scramble' first to input a scramble.\n\n"
+                "Solving from manually edited cube colors is not supported."
             )
             return
         
-        if not state.is_valid():
-            messagebox.showerror(
-                "Error",
-                "Invalid cube state! The cube configuration violates physical constraints."
-            )
-            return
-        
-        if state.is_solved():
-            messagebox.showinfo("Info", "Cube is already solved!")
-            self.solution = []
-            self.solution_text.delete(1.0, tk.END)
-            self.solution_text.insert(1.0, "Cube is already solved!")
-            return
-        
-        # Solve in background thread
+        # Solve in background thread using command-line interface
         self.solving = True
         self.status_label.config(text="Solving... Please wait...")
         self.root.update()
         
         def solve_thread():
             try:
-                # Initialize heuristic if needed
-                if self.heuristic is None:
-                    self.status_label.config(text="Building pattern databases...")
-                    self.root.update()
-                    self.heuristic = Heuristic()
-                
-                if self.solver is None:
-                    self.solver = IDAStar(self.heuristic)
-                
-                # Solve
-                self.status_label.config(text="Searching for solution...")
+                self.status_label.config(text="Calling solver...")
                 self.root.update()
-                solution = self.solver.solve(state, max_iterations=50)
                 
-                if solution:
-                    self.solution = solution
-                    solution_str = " ".join(solution)
-                    self.solution_text.delete(1.0, tk.END)
-                    self.solution_text.insert(1.0, f"Solution ({len(solution)} moves): {solution_str}")
-                    self.status_label.config(text=f"Solution found! {len(solution)} moves")
-                else:
+                # Get the directory of the current script
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                main_py = os.path.join(script_dir, "main.py")
+                
+                # Build command: python main.py --moves "scramble"
+                cmd = [sys.executable, main_py, "--moves", self.current_scramble, "--max-iterations", "50"]
+                
+                # Run the command
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=script_dir,
+                    timeout=300  # 5 minute timeout
+                )
+                
+                # Parse output to extract solution
+                output = result.stdout
+                solution = None
+                nodes_expanded = None
+                elapsed_time = None
+                
+                # Look for solution line: "Solution found (N moves):" followed by indented moves
+                # Format: "Solution found (2 moves):\n  R' U'"
+                solution_match = re.search(r'Solution found \((\d+) moves\):\s*\n\s+([^\n]+)', output)
+                if solution_match:
+                    num_moves = int(solution_match.group(1))
+                    solution_str = solution_match.group(2).strip()
+                    # Split by whitespace to get individual moves
+                    solution = solution_str.split()
+                
+                # Look for statistics
+                nodes_match = re.search(r'Nodes expanded:\s*([\d,]+)', output)
+                if nodes_match:
+                    nodes_expanded = nodes_match.group(1).replace(',', '')
+                
+                time_match = re.search(r'Time:\s*([\d.]+)\s*seconds', output)
+                if time_match:
+                    elapsed_time = float(time_match.group(1))
+                
+                # Check for errors
+                if result.returncode != 0 or "No solution found" in output:
                     self.solution = None
                     self.solution_text.delete(1.0, tk.END)
                     self.solution_text.insert(1.0, "No solution found within limits.")
                     self.status_label.config(text="No solution found")
                     messagebox.showwarning("Warning", "No solution found within iteration limit.")
+                    return
+                
+                if solution:
+                    self.solution = solution
+                    solution_str = " ".join(solution)
+                    stats_text = f"Solution ({len(solution)} moves): {solution_str}"
+                    if nodes_expanded:
+                        stats_text += f"\nNodes expanded: {nodes_expanded}"
+                    if elapsed_time:
+                        stats_text += f" | Time: {elapsed_time:.2f}s"
+                    self.solution_text.delete(1.0, tk.END)
+                    self.solution_text.insert(1.0, stats_text)
+                    self.status_label.config(text=f"Solution found! {len(solution)} moves")
+                else:
+                    # Fallback: try to extract from output even if regex didn't match
+                    self.solution = None
+                    self.solution_text.delete(1.0, tk.END)
+                    self.solution_text.insert(1.0, "Could not parse solution from output.\n\n" + output[-500:])
+                    self.status_label.config(text="Error parsing solution")
+                    messagebox.showerror("Error", "Could not parse solution from solver output.")
+                    
+            except subprocess.TimeoutExpired:
+                messagebox.showerror("Error", "Solver timed out after 5 minutes.")
+                self.status_label.config(text="Solver timed out")
             except Exception as e:
                 messagebox.showerror("Error", f"Error during solving: {e}")
                 self.status_label.config(text="Error during solving")
@@ -470,26 +497,42 @@ class CubeSolverGUI:
             messagebox.showwarning("Warning", "No solution available. Solve the cube first.")
             return
         
-        self.status_label.config(text="Animating solution...")
-        
-        # Convert current state to cubie model
-        try:
-            current_state = self.visualizer.to_cube_state()
-            if current_state is None:
-                messagebox.showerror(
-                    "Error",
-                    "Could not resolve cube state for animation.\n"
-                    "Please ensure the cube state is valid."
-                )
-                return
-        except Exception as e:
-            messagebox.showerror("Error", f"Error converting cube state: {e}")
+        # Check if we have a scramble to recreate the initial state
+        if not self.current_scramble:
+            messagebox.showwarning(
+                "Warning", 
+                "Cannot animate: no scramble stored.\n"
+                "Please use 'Load from Scramble' first, then solve."
+            )
             return
         
-        # Animate each move
+        self.status_label.config(text="Animating solution...")
+        
+        # Recreate the scrambled state from the stored scramble string
+        # This ensures we start from the exact same state the solution was computed for
+        try:
+            from utils import apply_moves
+            # Start from solved state
+            current_state = solved_state()
+            # Apply the scramble moves to recreate the initial scrambled state
+            scramble_moves = self.current_scramble.split()
+            current_state = apply_moves(current_state, scramble_moves)
+            
+            # Update visualizer to show the scrambled state first
+            self.visualizer.from_cube_state(current_state)
+            self.root.update()
+            time.sleep(0.5)  # Brief pause before starting solution
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Error recreating scrambled state: {e}")
+            return
+        
+        # Animate each move in the solution
         for i, move_name in enumerate(self.solution):
             if move_name in MOVE_TABLE:
+                # Apply the move to the state
                 current_state = MOVE_TABLE[move_name].apply(current_state)
+                # Update visualizer
                 self.visualizer.from_cube_state(current_state)
                 self.status_label.config(text=f"Animating solution... Move {i+1}/{len(self.solution)}: {move_name}")
                 self.root.update()
