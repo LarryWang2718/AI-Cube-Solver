@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, colorchooser
 import numpy as np
 from cube_state import CubeState, solved_state
-from moves import MOVE_TABLE
+from moves import MOVE_TABLE, MOVE_NAMES
 from heuristics import Heuristic
 from search import IDAStar
 import threading
@@ -95,10 +95,34 @@ class CubeVisualizer:
         """Draw the cube net on the canvas."""
         self.canvas.delete("all")
         
+        # Calculate cube net dimensions
+        max_row = max(pos[0] for pos in self.face_positions.values())
+        max_col = max(pos[1] for pos in self.face_positions.values())
+        face_width = 3 * self.cell_size
+        
+        # Total width of cube net: (max_col + 1) faces + spacing between them
+        cube_width = (max_col + 1) * face_width + (max_col + 2) * self.spacing
+        # Total height of cube net: (max_row + 1) faces + spacing + label space
+        cube_height = (max_row + 1) * face_width + (max_row + 2) * self.spacing + 20  # +20 for labels
+        
+        # Get canvas dimensions
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+        
+        # If canvas not yet rendered, use configured dimensions
+        if canvas_width <= 1:
+            canvas_width = int(self.canvas['width'])
+        if canvas_height <= 1:
+            canvas_height = int(self.canvas['height'])
+        
+        # Calculate centering offsets
+        x_offset = (canvas_width - cube_width) / 2
+        y_offset = (canvas_height - cube_height) / 2
+        
         for face_idx in range(6):
             row_pos, col_pos = self.face_positions[face_idx]
-            x_start = col_pos * (3 * self.cell_size + self.spacing) + self.spacing
-            y_start = row_pos * (3 * self.cell_size + self.spacing) + self.spacing
+            x_start = x_offset + col_pos * (face_width + self.spacing) + self.spacing
+            y_start = y_offset + row_pos * (face_width + self.spacing) + self.spacing + 20  # +20 for label space
             
             # Draw face label
             face_name = FACE_NAMES[face_idx]
@@ -130,10 +154,29 @@ class CubeVisualizer:
     
     def get_facelet_at_position(self, x, y):
         """Get facelet coordinates from canvas position."""
+        # Calculate cube net dimensions and offsets (same as in draw)
+        max_row = max(pos[0] for pos in self.face_positions.values())
+        max_col = max(pos[1] for pos in self.face_positions.values())
+        face_width = 3 * self.cell_size
+        
+        cube_width = (max_col + 1) * face_width + (max_col + 2) * self.spacing
+        cube_height = (max_row + 1) * face_width + (max_row + 2) * self.spacing + 20
+        
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+        
+        if canvas_width <= 1:
+            canvas_width = int(self.canvas['width'])
+        if canvas_height <= 1:
+            canvas_height = int(self.canvas['height'])
+        
+        x_offset = (canvas_width - cube_width) / 2
+        y_offset = (canvas_height - cube_height) / 2
+        
         for face_idx in range(6):
             row_pos, col_pos = self.face_positions[face_idx]
-            x_start = col_pos * (3 * self.cell_size + self.spacing) + self.spacing
-            y_start = row_pos * (3 * self.cell_size + self.spacing) + self.spacing
+            x_start = x_offset + col_pos * (face_width + self.spacing) + self.spacing
+            y_start = y_offset + row_pos * (face_width + self.spacing) + self.spacing + 20
             
             if x_start <= x < x_start + 3 * self.cell_size:
                 if y_start <= y < y_start + 3 * self.cell_size:
@@ -219,7 +262,7 @@ class CubeSolverGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Rubik's Cube Solver - Visual Interface")
-        self.root.geometry("800x700")
+        self.root.geometry("700x750")
         
         # Initialize components
         self.heuristic = None
@@ -227,6 +270,7 @@ class CubeSolverGUI:
         self.solution = None
         self.solving = False
         self.current_scramble = None  # Store the current scramble string
+        self.optimal_search = True  # Default to optimal search
         
         # Create main frame
         main_frame = ttk.Frame(root, padding="10")
@@ -246,17 +290,25 @@ class CubeSolverGUI:
         
         self.canvas = tk.Canvas(
             canvas_frame,
-            width=600,
-            height=400,
+            width=400,
+            height=300,
             bg='white',
             borderwidth=2,
             relief=tk.SUNKEN
         )
         self.canvas.pack()
         
-        # Initialize visualizer
-        self.visualizer = CubeVisualizer(self.canvas, cell_size=35, spacing=8)
-        self.visualizer.draw()
+        # Initialize visualizer with smaller cell size
+        self.visualizer = CubeVisualizer(self.canvas, cell_size=25, spacing=5)
+        
+        # Bind canvas resize to redraw with centering
+        def on_canvas_configure(event):
+            self.visualizer.draw()
+        
+        self.canvas.bind('<Configure>', on_canvas_configure)
+        
+        # Initial draw (will be recentered after window is shown)
+        self.root.after(100, lambda: self.visualizer.draw())
         
         # Color picker
         self.color_picker = ColorPicker(main_frame)
@@ -280,6 +332,33 @@ class CubeSolverGUI:
             foreground='gray'
         )
         instructions2.pack()
+        
+        # Search mode selection frame
+        search_mode_frame = ttk.Frame(main_frame)
+        search_mode_frame.pack(pady=5)
+        
+        ttk.Label(
+            search_mode_frame,
+            text="Search Mode:",
+            font=('Arial', 9, 'bold')
+        ).pack(side=tk.LEFT, padx=5)
+        
+        self.optimal_var = tk.BooleanVar(value=True)
+        ttk.Radiobutton(
+            search_mode_frame,
+            text="Optimal (guarantees shortest solution, slower)",
+            variable=self.optimal_var,
+            value=True,
+            command=self.on_search_mode_change
+        ).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Radiobutton(
+            search_mode_frame,
+            text="Suboptimal (returns first solution, faster)",
+            variable=self.optimal_var,
+            value=False,
+            command=self.on_search_mode_change
+        ).pack(side=tk.LEFT, padx=5)
         
         # Control buttons
         button_frame = ttk.Frame(main_frame)
@@ -317,17 +396,42 @@ class CubeSolverGUI:
         )
         self.status_label.pack(pady=5)
         
-        # Solution display
+        # Solution display area
+        solution_frame = ttk.LabelFrame(main_frame, text="Solution", padding="5")
+        solution_frame.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
+        
+        # Solution moves display (read-only, larger font, scrollable)
+        text_scrollbar = ttk.Scrollbar(solution_frame, orient=tk.VERTICAL)
         self.solution_text = tk.Text(
-            main_frame,
-            height=3,
-            width=60,
-            wrap=tk.WORD
+            solution_frame,
+            height=5,
+            width=70,
+            wrap=tk.WORD,
+            font=('Courier', 11),
+            state=tk.DISABLED,
+            yscrollcommand=text_scrollbar.set
         )
-        self.solution_text.pack(pady=5)
+        text_scrollbar.config(command=self.solution_text.yview)
+        text_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.solution_text.pack(pady=5, padx=(0, 5), fill=tk.BOTH, expand=True)
+        
+        # Solution statistics label
+        self.solution_stats_label = ttk.Label(
+            solution_frame,
+            text="",
+            font=('Arial', 9),
+            foreground='gray'
+        )
+        self.solution_stats_label.pack(pady=2)
         
         # Bind canvas click
         self.canvas.bind("<Button-1>", self.on_canvas_click)
+    
+    def on_search_mode_change(self):
+        """Handle search mode selection change."""
+        self.optimal_search = self.optimal_var.get()
+        mode_str = "optimal" if self.optimal_search else "suboptimal"
+        self.status_label.config(text=f"Search mode changed to {mode_str}")
     
     def on_canvas_click(self, event):
         """Handle click on canvas to change facelet color."""
@@ -347,7 +451,12 @@ class CubeSolverGUI:
         self.visualizer.draw()
         self.current_scramble = None  # Clear stored scramble
         self.status_label.config(text="Cube reset to solved state")
+        self.solution = None
+        # Clear solution display
+        self.solution_text.config(state=tk.NORMAL)
         self.solution_text.delete(1.0, tk.END)
+        self.solution_text.config(state=tk.DISABLED)
+        self.solution_stats_label.config(text="")
     
     def load_from_scramble(self):
         """Load cube state from a scramble string."""
@@ -378,7 +487,11 @@ class CubeSolverGUI:
                     self.current_scramble = scramble_str
                     self.status_label.config(text=f"Scramble applied: {scramble_str}")
                     self.solution = None
+                    # Clear solution display
+                    self.solution_text.config(state=tk.NORMAL)
                     self.solution_text.delete(1.0, tk.END)
+                    self.solution_text.config(state=tk.DISABLED)
+                    self.solution_stats_label.config(text="")
                 except Exception as e:
                     messagebox.showerror("Error", f"Invalid scramble: {e}")
             dialog.destroy()
@@ -415,8 +528,10 @@ class CubeSolverGUI:
                 script_dir = os.path.dirname(os.path.abspath(__file__))
                 main_py = os.path.join(script_dir, "main.py")
                 
-                # Build command: python main.py --moves "scramble"
+                # Build command: python main.py --moves "scramble" with optional --suboptimal flag
                 cmd = [sys.executable, main_py, "--moves", self.current_scramble, "--max-iterations", "50"]
+                if not self.optimal_search:
+                    cmd.append("--suboptimal")
                 
                 # Run the command
                 result = subprocess.run(
@@ -433,14 +548,24 @@ class CubeSolverGUI:
                 nodes_expanded = None
                 elapsed_time = None
                 
-                # Look for solution line: "Solution found (N moves):" followed by indented moves
-                # Format: "Solution found (2 moves):\n  R' U'"
-                solution_match = re.search(r'Solution found \((\d+) moves\):\s*\n\s+([^\n]+)', output)
-                if solution_match:
-                    num_moves = int(solution_match.group(1))
-                    solution_str = solution_match.group(2).strip()
-                    # Split by whitespace to get individual moves
-                    solution = solution_str.split()
+                # Look for solution - format: "Solution found (N moves):\n  R' U'"
+                lines = output.split('\n')
+                valid_move_set = set(MOVE_NAMES)  # Use set for O(1) lookup
+                
+                for i, line in enumerate(lines):
+                    if 'Solution found' in line:
+                        # Look at the next few lines for the solution moves
+                        for j in range(i + 1, min(i + 5, len(lines))):
+                            next_line = lines[j].strip()
+                            if next_line:
+                                # Split into potential moves
+                                potential_moves = next_line.split()
+                                # Validate: all moves should be valid cube moves
+                                if potential_moves and all(move in valid_move_set for move in potential_moves):
+                                    solution = potential_moves
+                                    break
+                        if solution:
+                            break
                 
                 # Look for statistics
                 nodes_match = re.search(r'Nodes expanded:\s*([\d,]+)', output)
@@ -451,33 +576,59 @@ class CubeSolverGUI:
                 if time_match:
                     elapsed_time = float(time_match.group(1))
                 
-                # Check for errors
-                if result.returncode != 0 or "No solution found" in output:
-                    self.solution = None
-                    self.solution_text.delete(1.0, tk.END)
-                    self.solution_text.insert(1.0, "No solution found within limits.")
-                    self.status_label.config(text="No solution found")
-                    messagebox.showwarning("Warning", "No solution found within iteration limit.")
-                    return
+                # Check for errors (but only if we didn't find a solution)
+                if not solution:
+                    if result.returncode != 0 or "No solution found" in output:
+                        self.solution = None
+                        self.solution_text.config(state=tk.NORMAL)
+                        self.solution_text.delete(1.0, tk.END)
+                        self.solution_text.insert(1.0, "No solution found within limits.")
+                        self.solution_text.config(state=tk.DISABLED)
+                        self.solution_stats_label.config(text="")
+                        self.status_label.config(text="No solution found")
+                        messagebox.showwarning("Warning", "No solution found within iteration limit.")
+                        return
                 
                 if solution:
                     self.solution = solution
                     solution_str = " ".join(solution)
-                    stats_text = f"Solution ({len(solution)} moves): {solution_str}"
-                    if nodes_expanded:
-                        stats_text += f"\nNodes expanded: {nodes_expanded}"
-                    if elapsed_time:
-                        stats_text += f" | Time: {elapsed_time:.2f}s"
+                    
+                    # Display solution moves (full solution in readable format)
+                    self.solution_text.config(state=tk.NORMAL)
                     self.solution_text.delete(1.0, tk.END)
-                    self.solution_text.insert(1.0, stats_text)
+                    self.solution_text.insert(1.0, solution_str)
+                    self.solution_text.config(state=tk.DISABLED)
+                    
+                    # Display statistics separately
+                    stats_parts = []
+                    stats_parts.append(f"{len(solution)} moves")
+                    if nodes_expanded:
+                        stats_parts.append(f"Nodes: {nodes_expanded}")
+                    if elapsed_time:
+                        stats_parts.append(f"Time: {elapsed_time:.2f}s")
+                    stats_text = " | ".join(stats_parts)
+                    self.solution_stats_label.config(text=stats_text)
+                    
                     self.status_label.config(text=f"Solution found! {len(solution)} moves")
                 else:
                     # Fallback: try to extract from output even if regex didn't match
+                    # Show last part of output for debugging
                     self.solution = None
+                    self.solution_text.config(state=tk.NORMAL)
                     self.solution_text.delete(1.0, tk.END)
-                    self.solution_text.insert(1.0, "Could not parse solution from output.\n\n" + output[-500:])
+                    error_msg = "Could not parse solution from output.\n\n"
+                    error_msg += "Last 500 characters of output:\n"
+                    error_msg += output[-500:] if len(output) > 500 else output
+                    self.solution_text.insert(1.0, error_msg)
+                    self.solution_text.config(state=tk.DISABLED)
+                    self.solution_stats_label.config(text="")
                     self.status_label.config(text="Error parsing solution")
-                    messagebox.showerror("Error", "Could not parse solution from solver output.")
+                    
+                    # Try to show more helpful error message
+                    if "No solution found" in output:
+                        messagebox.showwarning("Warning", "No solution found within iteration limit.")
+                    else:
+                        messagebox.showerror("Error", f"Could not parse solution from solver output.\n\nCheck the output below for details.")
                     
             except subprocess.TimeoutExpired:
                 messagebox.showerror("Error", "Solver timed out after 5 minutes.")
@@ -521,7 +672,7 @@ class CubeSolverGUI:
             # Update visualizer to show the scrambled state first
             self.visualizer.from_cube_state(current_state)
             self.root.update()
-            time.sleep(0.5)  # Brief pause before starting solution
+            time.sleep(1.0)  # Brief pause before starting solution
             
         except Exception as e:
             messagebox.showerror("Error", f"Error recreating scrambled state: {e}")
@@ -536,7 +687,7 @@ class CubeSolverGUI:
                 self.visualizer.from_cube_state(current_state)
                 self.status_label.config(text=f"Animating solution... Move {i+1}/{len(self.solution)}: {move_name}")
                 self.root.update()
-                time.sleep(0.8)  # Delay between moves
+                time.sleep(1.5)  # Delay between moves
         
         # Verify final state
         if current_state.is_solved():

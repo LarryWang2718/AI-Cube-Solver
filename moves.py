@@ -284,3 +284,4 @@ for name, move in MOVE_TABLE.items():
 # List of all moves
 ALL_MOVES = [MOVE_TABLE[name] for name in MOVE_NAMES]
 
+

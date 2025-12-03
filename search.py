@@ -13,18 +13,21 @@ FAIL = object()
 class IDAStar:
     """IDA* algorithm with pattern database heuristics."""
     
-    def __init__(self, heuristic: Heuristic = None):
+    def __init__(self, heuristic: Heuristic = None, optimal: bool = True):
         """
         Initialize IDA* solver.
         
         Args:
             heuristic: Heuristic object (will be created if None)
+            optimal: If True, explores all paths at threshold before returning (guarantees optimality).
+                     If False, returns first solution found (faster but may be suboptimal).
         """
         if heuristic is None:
             self.heuristic = Heuristic()
         else:
             self.heuristic = heuristic
         
+        self.optimal = optimal
         self.nodes_expanded = 0
         self.max_depth_reached = 0
     
@@ -67,7 +70,7 @@ class IDAStar:
             # Since we start with path_len=0, we don't need to clear, but let's be safe
             # Actually, we don't need to clear since path_len=0 means we only read path[0:path_len]
             
-            result, next_threshold = self._search(working_state, 0, threshold, None, path, 0)
+            result, next_threshold = self._search(working_state, 0.0, threshold, None, path, 0)
             
             if isinstance(result, list):
                 if verbose:
@@ -111,6 +114,7 @@ class IDAStar:
             return path[:path_len], threshold
         
         min_overflow = float('inf')
+        best_solution = None  # Track best solution at this threshold (for optimal mode)
         
         # Get face of last move for face-axis pruning
         last_face = None
@@ -141,11 +145,23 @@ class IDAStar:
             inverse_move.apply_in_place(state)
             
             if isinstance(result, list):
-                return result, threshold
-            
-            # Track minimum f-value that exceeded threshold
-            if next_threshold < min_overflow:
-                min_overflow = next_threshold
+                if self.optimal:
+                    # Optimal mode: continue searching to find the shortest solution
+                    if best_solution is None or len(result) < len(best_solution):
+                        best_solution = result
+                    # Continue searching all paths at this threshold
+                    # Don't update min_overflow here - next_threshold is just the threshold for solutions
+                else:
+                    # Suboptimal mode: return first solution found
+                    return result, threshold
+            else:
+                # Track minimum f-value that exceeded threshold (only for non-solution results)
+                if next_threshold < min_overflow:
+                    min_overflow = next_threshold
+        
+        # Optimal mode: return best solution found (or FAIL if none)
+        if self.optimal and best_solution is not None:
+            return best_solution, threshold
         
         return FAIL, min_overflow
 

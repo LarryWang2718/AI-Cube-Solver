@@ -26,6 +26,8 @@ def main():
                        help='Save pattern databases to disk (not implemented)')
     parser.add_argument('--load-pdb', type=str, default=None,
                        help='Load pattern databases from disk (not implemented)')
+    parser.add_argument('--suboptimal', action='store_true',
+                       help='Use suboptimal search (returns first solution found, faster). Default is optimal search.')
     
     args = parser.parse_args()
     
@@ -67,7 +69,8 @@ def main():
     # Solve
     start_time = time.time()
     
-    print("Using IDA* algorithm with pattern databases...")
+    search_mode = "suboptimal" if args.suboptimal else "optimal"
+    print(f"Using IDA* algorithm with pattern databases ({search_mode} mode)...")
     print()
     
     # Build or load heuristics
@@ -78,7 +81,7 @@ def main():
     else:
         heuristic = Heuristic()
     
-    solver = IDAStar(heuristic)
+    solver = IDAStar(heuristic, optimal=not args.suboptimal)
     solution = solver.solve(initial_state, args.max_iterations)
     nodes_expanded = solver.nodes_expanded
     
